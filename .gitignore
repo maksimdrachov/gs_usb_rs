@@ -45,3 +45,6 @@ criterion/
 # Environment files
 .env
 .env.local
+
+# Zed IDE
+.zed/
