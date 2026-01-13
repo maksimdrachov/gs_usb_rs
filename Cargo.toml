@@ -1,0 +1,38 @@
+[package]
+name = "gs_usb"
+version = "0.1.0"
+edition = "2021"
+authors = ["Maksim"]
+description = "GS-USB protocol implementation for CAN adapters"
+license = "MIT"
+repository = "https://github.com/user/gs_usb_rs"
+keywords = ["can", "usb", "gs_usb", "candlelight", "canbus"]
+categories = ["hardware-support", "embedded"]
+
+[dependencies]
+rusb = "0.9"
+thiserror = "1.0"
+log = "0.4"
+
+[dev-dependencies]
+env_logger = "0.11"
+
+[[example]]
+name = "gs_usb_example"
+path = "examples/gs_usb_example.rs"
+
+[[example]]
+name = "device_initialization"
+path = "examples/1_device_initialization.rs"
+
+[[example]]
+name = "channel_start_sequence"
+path = "examples/2_channel_start_sequence.rs"
+
+[[example]]
+name = "test_all_bitrates"
+path = "examples/3_test_all_bitrates.rs"
+
+[[example]]
+name = "test_get_state"
+path = "examples/4_test_get_state.rs"
