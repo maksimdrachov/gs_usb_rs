@@ -189,19 +189,6 @@ impl GsUsb {
 
         // Get timing parameters based on clock and sample point
         let timing = match (clock, (sample_point * 10.0) as u32) {
-            // 48 MHz clock, 87.5% sample point
-            (48_000_000, 875) => match bitrate {
-                10_000 => Some((prop_seg, 12, 2, sjw, 300)),
-                20_000 => Some((prop_seg, 12, 2, sjw, 150)),
-                50_000 => Some((prop_seg, 12, 2, sjw, 60)),
-                100_000 => Some((prop_seg, 12, 2, sjw, 30)),
-                125_000 => Some((prop_seg, 12, 2, sjw, 24)),
-                250_000 => Some((prop_seg, 12, 2, sjw, 12)),
-                500_000 => Some((prop_seg, 12, 2, sjw, 6)),
-                800_000 => Some((prop_seg, 11, 2, sjw, 4)),
-                1_000_000 => Some((prop_seg, 12, 2, sjw, 3)),
-                _ => None,
-            },
             // 80 MHz clock, 87.5% sample point
             (80_000_000, 875) => match bitrate {
                 10_000 => Some((prop_seg, 12, 2, sjw, 500)),

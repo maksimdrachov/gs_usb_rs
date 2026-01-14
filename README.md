@@ -112,17 +112,17 @@ cargo run --example test_get_state
 
 ### Classic CAN (87.5% sample point)
 
-| Bitrate | 48 MHz | 80 MHz | 40 MHz |
-|---------|--------|--------|--------|
-| 10 kbps | ✓ | ✓ | ✓ |
-| 20 kbps | ✓ | ✓ | ✓ |
-| 50 kbps | ✓ | ✓ | ✓ |
-| 100 kbps | ✓ | ✓ | ✓ |
-| 125 kbps | ✓ | ✓ | ✓ |
-| 250 kbps | ✓ | ✓ | ✓ |
-| 500 kbps | ✓ | ✓ | ✓ |
-| 800 kbps | ✓ | ✓ | ✓ |
-| 1 Mbps | ✓ | ✓ | ✓ |
+| Bitrate | 80 MHz | 40 MHz |
+|---------|--------|--------|
+| 10 kbps | ✓ | ✓ |
+| 20 kbps | ✓ | ✓ |
+| 50 kbps | ✓ | ✓ |
+| 100 kbps | ✓ | ✓ |
+| 125 kbps | ✓ | ✓ |
+| 250 kbps | ✓ | ✓ |
+| 500 kbps | ✓ | ✓ |
+| 800 kbps | ✓ | ✓ |
+| 1 Mbps | ✓ | ✓ |
 
 ### CAN FD Data Phase (75% sample point)
 
