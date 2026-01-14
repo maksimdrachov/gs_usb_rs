@@ -122,6 +122,12 @@ fn run() -> gs_usb::Result<()> {
     println!("  Loopback mode: Enabled");
     println!();
 
+    // Print the bit timing used
+    println!("Bit timing (last set):");
+    println!("  Nominal: {:?}", dev.last_timing());
+    println!("  Data:    {:?}", dev.last_data_timing());
+    println!();
+
     // Demonstrate sending a CAN FD frame
     println!("=== Sending Test CAN FD Frame ===");
     // Create a CAN FD frame with 64 bytes of data (requires FD mode)

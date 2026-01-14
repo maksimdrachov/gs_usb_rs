@@ -67,6 +67,10 @@ pub struct GsUsb {
     address: u8,
     /// Device serial number (cached)
     serial_number: Option<String>,
+    /// Last nominal (arbitration) phase bit timing that was set
+    last_timing: Option<DeviceBitTiming>,
+    /// Last data phase (CAN FD) bit timing that was set
+    last_data_timing: Option<DeviceBitTiming>,
 }
 
 impl GsUsb {
@@ -81,6 +85,8 @@ impl GsUsb {
             bus,
             address,
             serial_number: None,
+            last_timing: None,
+            last_data_timing: None,
         }
     }
 
@@ -253,7 +259,9 @@ impl GsUsb {
         brp: u32,
     ) -> Result<()> {
         let timing = DeviceBitTiming::new(prop_seg, phase_seg1, phase_seg2, sjw, brp);
-        self.control_out(GS_USB_BREQ_BITTIMING, 0, &timing.pack())
+        self.control_out(GS_USB_BREQ_BITTIMING, 0, &timing.pack())?;
+        self.last_timing = Some(timing);
+        Ok(())
     }
 
     /// Set CAN FD data phase bit timing parameters
@@ -266,7 +274,19 @@ impl GsUsb {
         brp: u32,
     ) -> Result<()> {
         let timing = DeviceBitTiming::new(prop_seg, phase_seg1, phase_seg2, sjw, brp);
-        self.control_out(GS_USB_BREQ_DATA_BITTIMING, 0, &timing.pack())
+        self.control_out(GS_USB_BREQ_DATA_BITTIMING, 0, &timing.pack())?;
+        self.last_data_timing = Some(timing);
+        Ok(())
+    }
+
+    /// Get the last nominal (arbitration) phase timing that was set via `set_timing`/`set_bitrate*`
+    pub fn last_timing(&self) -> Option<DeviceBitTiming> {
+        self.last_timing
+    }
+
+    /// Get the last data phase (CAN FD) timing that was set via `set_data_timing`/`set_data_bitrate*`
+    pub fn last_data_timing(&self) -> Option<DeviceBitTiming> {
+        self.last_data_timing
     }
 
     /// Set CAN FD data phase bitrate
