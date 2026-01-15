@@ -122,7 +122,7 @@ fn run() -> gs_usb::Result<i32> {
 
         // Only print if state changed
         let state_tuple = (state.state, state.rxerr, state.txerr);
-        if last_state.map_or(true, |last| last != state_tuple) {
+        if last_state != Some(state_tuple) {
             let elapsed = start_time.elapsed().as_secs_f64();
             println!(
                 "[{:5.2}s] State: {:15} REC: {:3}  TEC: {:3}",

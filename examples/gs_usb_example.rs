@@ -45,7 +45,7 @@ fn run() -> gs_usb::Result<()> {
     // Prepare frames
     let data: [u8; 8] = [0x12, 0x34, 0x56, 0x78, 0x9A, 0xBC, 0xDE, 0xF0];
 
-    let frames = vec![
+    let frames = [
         // Standard frame format with data
         GsUsbFrame::with_data(0x7FF, &data),
         // Standard frame format without data
