@@ -24,7 +24,7 @@ Add this to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-gs_usb = "0.1"
+gs_usb = "0.1.1"
 ```
 
 ### System Dependencies
