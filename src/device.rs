@@ -172,47 +172,35 @@ impl GsUsb {
     /// - 800000 (800 kbps)
     /// - 1000000 (1 Mbps)
     pub fn set_bitrate(&mut self, bitrate: u32) -> Result<()> {
-        self.set_bitrate_with_sample_point(bitrate, 87.5)
-    }
-
-    /// Set the CAN bitrate with a specific sample point
-    ///
-    /// # Arguments
-    /// * `bitrate` - Bitrate in bits per second
-    /// * `sample_point` - Sample point percentage (typically 87.5%)
-    pub fn set_bitrate_with_sample_point(&mut self, bitrate: u32, sample_point: f32) -> Result<()> {
         let capability = self.device_capability()?;
         let clock = capability.fclk_can;
 
-        let prop_seg = 1;
-        let sjw = 1;
-
-        // Get timing parameters based on clock and sample point
-        let timing = match (clock, (sample_point * 10.0) as u32) {
-            // 80 MHz clock, 87.5% sample point
-            (80_000_000, 875) => match bitrate {
-                10_000 => Some((prop_seg, 12, 2, sjw, 500)),
-                20_000 => Some((prop_seg, 12, 2, sjw, 250)),
-                50_000 => Some((prop_seg, 12, 2, sjw, 100)),
-                100_000 => Some((prop_seg, 12, 2, sjw, 50)),
-                125_000 => Some((prop_seg, 12, 2, sjw, 40)),
-                250_000 => Some((prop_seg, 12, 2, sjw, 20)),
-                500_000 => Some((prop_seg, 12, 2, sjw, 10)),
-                800_000 => Some((prop_seg, 7, 1, sjw, 10)),
-                1_000_000 => Some((prop_seg, 12, 2, sjw, 5)),
+        // Get timing parameters based on clock
+        // Returns (prop_seg, phase_seg1, phase_seg2, sjw, brp)
+        // Sample points: 87.5% for 10-500 Kbps, 75% for 1 Mbps
+        let timing = match clock {
+            // 80 MHz clock (PEAK Systems)
+            80_000_000 => match bitrate {
+                10_000 => Some((87, 87, 25, 12, 40)),   // 87.5% sample point
+                20_000 => Some((87, 87, 25, 12, 20)),   // 87.5% sample point
+                50_000 => Some((87, 87, 25, 12, 8)),    // 87.5% sample point
+                100_000 => Some((87, 87, 25, 12, 4)),   // 87.5% sample point
+                125_000 => Some((69, 70, 20, 10, 4)),   // 87.5% sample point
+                250_000 => Some((69, 70, 20, 10, 2)),   // 87.5% sample point
+                500_000 => Some((69, 70, 20, 10, 1)),   // 87.5% sample point
+                1_000_000 => Some((29, 30, 20, 10, 1)), // 75% sample point
                 _ => None,
             },
-            // 40 MHz clock, 87.5% sample point (CF3 / TCAN4550)
-            (40_000_000, 875) => match bitrate {
-                10_000 => Some((prop_seg, 12, 2, sjw, 250)),
-                20_000 => Some((prop_seg, 12, 2, sjw, 125)),
-                50_000 => Some((prop_seg, 12, 2, sjw, 50)),
-                100_000 => Some((prop_seg, 12, 2, sjw, 25)),
-                125_000 => Some((prop_seg, 12, 2, sjw, 20)),
-                250_000 => Some((prop_seg, 12, 2, sjw, 10)),
-                500_000 => Some((prop_seg, 12, 2, sjw, 5)),
-                800_000 => Some((prop_seg, 7, 1, sjw, 5)),
-                1_000_000 => Some((prop_seg, 5, 1, sjw, 5)),
+            // 40 MHz clock (CF3 / candleLight)
+            40_000_000 => match bitrate {
+                10_000 => Some((87, 87, 25, 12, 20)),  // 87.5% sample point
+                20_000 => Some((87, 87, 25, 12, 10)),  // 87.5% sample point
+                50_000 => Some((87, 87, 25, 12, 4)),   // 87.5% sample point
+                100_000 => Some((87, 87, 25, 12, 2)),  // 87.5% sample point
+                125_000 => Some((69, 70, 20, 10, 2)),  // 87.5% sample point
+                250_000 => Some((69, 70, 20, 10, 1)),  // 87.5% sample point
+                500_000 => Some((34, 35, 10, 5, 1)),   // 87.5% sample point
+                1_000_000 => Some((14, 15, 10, 5, 1)), // 75% sample point
                 _ => None,
             },
             _ => None,
@@ -278,20 +266,11 @@ impl GsUsb {
 
     /// Set CAN FD data phase bitrate
     ///
-    /// Common data bitrates: 2 Mbps, 4 Mbps, 5 Mbps, 8 Mbps, 10 Mbps
+    /// Common data bitrates: 1 Mbps, 2 Mbps, 5 Mbps, 8 Mbps, 10 Mbps
     ///
     /// # Arguments
     /// * `bitrate` - Data phase bitrate in bits per second
     pub fn set_data_bitrate(&mut self, bitrate: u32) -> Result<()> {
-        self.set_data_bitrate_with_sample_point(bitrate, 75.0)
-    }
-
-    /// Set CAN FD data phase bitrate with a specific sample point
-    pub fn set_data_bitrate_with_sample_point(
-        &mut self,
-        bitrate: u32,
-        sample_point: f32,
-    ) -> Result<()> {
         let capability = self.device_capability()?;
 
         // Check if device supports CAN FD
@@ -300,26 +279,27 @@ impl GsUsb {
         }
 
         let clock = capability.fclk_can;
-        let prop_seg = 1;
-        let sjw = 1;
 
         // Get timing parameters based on clock
-        let timing = match (clock, (sample_point * 10.0) as u32) {
-            // 80 MHz clock, 75% sample point
-            (80_000_000, 750) => match bitrate {
-                2_000_000 => Some((prop_seg, 4, 2, sjw, 5)),
-                4_000_000 => Some((prop_seg, 1, 1, sjw, 5)),
-                5_000_000 => Some((prop_seg, 4, 2, sjw, 2)),
-                8_000_000 => Some((prop_seg, 2, 1, sjw, 2)),
+        // Returns (prop_seg, phase_seg1, phase_seg2, sjw, brp)
+        // Sample points: 75% for most bitrates, 70% for 8 Mbps @ 80 MHz, 60% for 8 Mbps @ 40 MHz
+        let timing = match clock {
+            // 80 MHz clock (PEAK Systems)
+            80_000_000 => match bitrate {
+                1_000_000 => Some((14, 15, 10, 5, 2)), // 75% sample point
+                2_000_000 => Some((14, 15, 10, 5, 1)), // 75% sample point
+                5_000_000 => Some((5, 6, 4, 2, 1)),    // 75% sample point
+                8_000_000 => Some((3, 3, 3, 1, 1)),    // 70% sample point
+                10_000_000 => Some((2, 3, 2, 1, 1)),   // 75% sample point
                 _ => None,
             },
-            // 40 MHz clock, 75-80% sample point (TCAN4550/CF3)
-            (40_000_000, 750) => match bitrate {
-                2_000_000 => Some((prop_seg, 6, 2, sjw, 2)),
-                4_000_000 => Some((prop_seg, 2, 1, sjw, 2)),
-                5_000_000 => Some((prop_seg, 4, 2, sjw, 1)),
-                8_000_000 => Some((prop_seg, 2, 1, sjw, 1)),
-                10_000_000 => Some((prop_seg, 1, 1, sjw, 1)),
+            // 40 MHz clock (CF3 / candleLight)
+            40_000_000 => match bitrate {
+                1_000_000 => Some((14, 15, 10, 5, 1)), // 75% sample point
+                2_000_000 => Some((7, 7, 5, 2, 1)),    // 75% sample point
+                5_000_000 => Some((2, 3, 2, 1, 1)),    // 75% sample point
+                8_000_000 => Some((1, 1, 2, 1, 1)),    // 60% sample point
+                10_000_000 => Some((1, 1, 1, 1, 1)),   // 75% sample point
                 _ => None,
             },
             _ => None,
